@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- El tema real de la app está en Compose (ui/theme/Theme.kt). Este solo evita la barra de acción. -->
+    <style name="Theme.HuellitasVet" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/fondo</item>
+    </style>
+    <color name="fondo">#F6FDF9</color>
+    <color name="esmeralda">#059669</color>
+</resources>
