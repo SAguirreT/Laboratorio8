@@ -38,9 +38,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tecsup.huellitasvet.model.Rol
+import com.tecsup.huellitasvet.ui.dueno.InicioScreen
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
+import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
+import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
@@ -129,8 +132,27 @@ fun NavVet(sesionVm: SesionViewModel) {
             composable(Rutas.LOGIN) { LoginScreen(sesionVm, oscuro) }
 
             // ================= Dueño =================
-            composable(Rutas.INICIO) { EnConstruccion("Inicio") }
-            composable(Rutas.MASCOTAS) { EnConstruccion("Mascotas") }
+            composable(Rutas.INICIO) {
+                val u = usuario ?: return@composable
+                val vm = vetViewModel { app -> InicioViewModel(app.repository, app.preferencias, u.id) }
+                InicioScreen(
+                    vm = vm,
+                    nombre = u.nombre,
+                    onFicha = { nav.navigate(Rutas.ficha(it)) },
+                    onAgregar = { nav.navigate(Rutas.formMascota()) },
+                    onVerMascotas = { nav.irAPestana(Rutas.MASCOTAS, inicio) },
+                    onPedirCita = { nav.navigate(Rutas.pedirCita()) }
+                )
+            }
+            composable(Rutas.MASCOTAS) {
+                val u = usuario ?: return@composable
+                val vm = vetViewModel { app -> InicioViewModel(app.repository, app.preferencias, u.id) }
+                MascotasScreen(
+                    vm = vm,
+                    onFicha = { nav.navigate(Rutas.ficha(it)) },
+                    onAgregar = { nav.navigate(Rutas.formMascota()) }
+                )
+            }
             composable(Rutas.FORM_MASCOTA, arguments = argId) { EnConstruccion("Nueva mascota") }
             composable(Rutas.FICHA, arguments = argId) { EnConstruccion("Ficha") }
             composable(Rutas.PEDIR_CITA, arguments = argMascotaId) { EnConstruccion("Pedir cita") }
