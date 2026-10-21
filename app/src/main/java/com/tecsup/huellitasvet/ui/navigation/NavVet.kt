@@ -143,7 +143,13 @@ fun NavVet(sesionVm: SesionViewModel) {
             startDestination = Rutas.SPLASH,
             modifier = Modifier.padding(padding).imePadding()
         ) {
-            composable(Rutas.SPLASH) { SplashScreen(onTerminar = { splashListo = true }) }
+            composable(Rutas.SPLASH) {
+                SplashScreen(
+                    cargando = cargando,
+                    haySesion = usuario != null,
+                    onContinuar = { splashListo = true }
+                )
+            }
 
             composable(Rutas.LOGIN) { LoginScreen(sesionVm, oscuro) }
 
