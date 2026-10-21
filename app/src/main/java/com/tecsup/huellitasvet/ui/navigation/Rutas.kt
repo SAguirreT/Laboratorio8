@@ -18,6 +18,9 @@ object Rutas {
     fun ficha(id: Int) = "ficha/$id"
     fun pedirCita(mascotaId: Int = -1) = "pedir_cita?mascotaId=$mascotaId"
 
+    const val REPROGRAMAR = "reprogramar/{id}" // mejora IA
+    fun reprogramar(id: Int) = "reprogramar/$id"
+
     // Veterinario
     const val PANEL = "panel"
     const val AGENDA = "agenda"

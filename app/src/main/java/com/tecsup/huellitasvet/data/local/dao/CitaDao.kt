@@ -30,6 +30,10 @@ interface CitaDao {
     )
     suspend fun registrarAtencion(id: Int, diagnostico: String, tratamiento: String, peso: Double)
 
+    /** Mejora IA: cambia fecha y hora de una cita. */
+    @Query("UPDATE citas SET fecha = :fecha, hora = :hora WHERE id = :id")
+    suspend fun reprogramar(id: Int, fecha: String, hora: String)
+
     @Query("SELECT * FROM citas WHERE id = :id")
     suspend fun obtener(id: Int): Cita?
 

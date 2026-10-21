@@ -44,7 +44,8 @@ import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
 @Composable
 fun MisCitasScreen(
     vm: MisCitasViewModel,
-    onPedirCita: () -> Unit
+    onPedirCita: () -> Unit,
+    onReprogramar: (Int) -> Unit = {}
 ) {
     val proximas by vm.proximas.collectAsState()
     val historial by vm.historial.collectAsState()
@@ -88,6 +89,9 @@ fun MisCitasScreen(
                         icono = iconoServicio(c.servicio.icono),
                         estado = c.estado
                     ) {
+                        if (pestana == 0 && c.estado.esActiva && vm.puedeCancelar(c)) {
+                            TextButton(onClick = { onReprogramar(c.cita.id) }) { Text("Reprogramar") }
+                        }
                         if (pestana == 0 && c.estado.esActiva) {
                             // Si faltan 2 horas o menos, el ViewModel responde 'Ya no puedes cancelar esta cita'
                             TextButton(onClick = { if (vm.puedeCancelar(c)) porCancelar = c else vm.cancelar(c) }) {

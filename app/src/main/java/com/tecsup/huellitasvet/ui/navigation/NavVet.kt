@@ -44,6 +44,7 @@ import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
 import com.tecsup.huellitasvet.ui.dueno.MisCitasScreen
 import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.PerfilScreen
+import com.tecsup.huellitasvet.ui.dueno.ReprogramarCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.veterinario.AgendaScreen
 import com.tecsup.huellitasvet.ui.veterinario.AjustesScreen
@@ -60,6 +61,7 @@ import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
 import com.tecsup.huellitasvet.viewmodel.PacientesViewModel
 import com.tecsup.huellitasvet.viewmodel.PanelViewModel
 import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
+import com.tecsup.huellitasvet.viewmodel.ReprogramarCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
@@ -216,7 +218,16 @@ fun NavVet(sesionVm: SesionViewModel) {
             composable(Rutas.MIS_CITAS) {
                 val u = usuario ?: return@composable
                 val vm = vetViewModel { app -> MisCitasViewModel(app.repository, u.id) }
-                MisCitasScreen(vm, onPedirCita = { nav.navigate(Rutas.pedirCita()) })
+                MisCitasScreen(
+                    vm,
+                    onPedirCita = { nav.navigate(Rutas.pedirCita()) },
+                    onReprogramar = { nav.navigate(Rutas.reprogramar(it)) }
+                )
+            }
+            composable(Rutas.REPROGRAMAR, arguments = argId) { entrada ->
+                val id = entrada.arguments?.getInt("id") ?: -1
+                val vm = vetViewModel { app -> ReprogramarCitaViewModel(app.repository, id) }
+                ReprogramarCitaScreen(vm, onVolver = { nav.popBackStack() })
             }
             composable(Rutas.PERFIL) {
                 val u = usuario ?: return@composable

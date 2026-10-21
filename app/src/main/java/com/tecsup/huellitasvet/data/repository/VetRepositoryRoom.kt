@@ -100,6 +100,17 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     override suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita) = citaDao.actualizarEstado(id, estado.name)
 
     /**
+     * Mejora IA: dentro de una transacción vuelve a comprobar que el horario esté libre
+     * y luego cambia fecha y hora. Devuelve false si el horario ya se ocupó.
+     */
+    override suspend fun reprogramarCita(id: Int, fecha: String, hora: String): Boolean =
+        db.withTransaction {
+            if (citaDao.contarOcupadas(fecha, hora) > 0) return@withTransaction false
+            citaDao.reprogramar(id, fecha, hora)
+            true
+        }
+
+    /**
      * UNA transacción para dos tablas: la cita pasa a ATENDIDA con sus datos y la mascota
      * actualiza su peso. Si algo falla, Room deshace todo (no queda nada a medias).
      */
