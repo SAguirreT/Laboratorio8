@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import java.text.Normalizer
 
 /** Un paciente para la lista: mascota con dueño y la fecha de su última visita (o null). */
 data class PacienteUi(
@@ -35,16 +36,27 @@ class PacientesViewModel(repo: VetRepository) : ViewModel() {
         _especie
     ) { mascotas, visitas, texto, especie ->
         val ultima = visitas.associate { it.mascotaId to it.fecha }
-        val busqueda = texto.trim().lowercase()
+        // Mejora IA: la búsqueda ignora mayúsculas y tildes ("maria" encuentra "María")
+        // y cada palabra debe aparecer en el nombre de la mascota, del dueño o en la raza.
+        val palabras = normalizar(texto).split(' ').filter { it.isNotBlank() }
         mascotas
             .filter { especie == null || it.mascota.especie == especie.name }
-            .filter {
-                busqueda.isEmpty() ||
-                    it.mascota.nombre.lowercase().contains(busqueda) ||
-                    it.dueno.nombre.lowercase().contains(busqueda)
+            .filter { m ->
+                val donde = normalizar("${m.mascota.nombre} ${m.dueno.nombre} ${m.mascota.raza}")
+                palabras.all { donde.contains(it) }
             }
+            .sortedBy { normalizar(it.mascota.nombre) }
             .map { PacienteUi(it, ultima[it.mascota.id]) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    /** true si hay texto o especie elegida (para mostrar 'Limpiar filtros'). */
+    val hayFiltros: StateFlow<Boolean> = combine(_texto, _especie) { t, e -> t.isNotBlank() || e != null }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    fun limpiarFiltros() {
+        _texto.value = ""
+        _especie.value = null
+    }
 
     fun buscar(t: String) {
         _texto.value = t
@@ -53,4 +65,8 @@ class PacientesViewModel(repo: VetRepository) : ViewModel() {
     fun filtrar(e: Especie?) {
         _especie.value = e
     }
+
+    private fun normalizar(t: String): String =
+        Normalizer.normalize(t.lowercase().trim(), Normalizer.Form.NFD)
+            .replace(Regex("\\p{Mn}+"), "")
 }

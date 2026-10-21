@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,16 +40,29 @@ fun PacientesScreen(vm: PacientesViewModel, onFicha: (Int) -> Unit) {
     val texto by vm.texto.collectAsState()
     val especie by vm.especie.collectAsState()
     val pacientes by vm.pacientes.collectAsState()
+    val hayFiltros by vm.hayFiltros.collectAsState()
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("Pacientes")
         Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            VetTextField(texto, vm::buscar, "Buscar mascota o dueño...", icono = Icons.Filled.Search)
+            VetTextField(texto, vm::buscar, "Buscar mascota, dueño o raza...", icono = Icons.Filled.Search)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OpcionChip("Todos", especie == null, onClick = { vm.filtrar(null) })
                 OpcionChip("Perros", especie == Especie.PERRO, onClick = { vm.filtrar(Especie.PERRO) })
                 OpcionChip("Gatos", especie == Especie.GATO, onClick = { vm.filtrar(Especie.GATO) })
                 OpcionChip("Otros", especie == Especie.OTRO, onClick = { vm.filtrar(Especie.OTRO) })
+            }
+            // Mejora IA: contador de resultados y botón para limpiar
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    if (pacientes.size == 1) "1 paciente" else "${pacientes.size} pacientes",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f)
+                )
+                if (hayFiltros) {
+                    TextButton(onClick = vm::limpiarFiltros) { Text("Limpiar filtros") }
+                }
             }
         }
         LazyColumn(
