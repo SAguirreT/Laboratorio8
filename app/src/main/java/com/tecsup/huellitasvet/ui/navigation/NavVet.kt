@@ -47,12 +47,16 @@ import com.tecsup.huellitasvet.ui.dueno.MisCitasScreen
 import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.veterinario.AgendaScreen
+import com.tecsup.huellitasvet.ui.veterinario.AtenderCitaScreen
+import com.tecsup.huellitasvet.ui.veterinario.PacientesScreen
 import com.tecsup.huellitasvet.ui.veterinario.PanelScreen
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
 import com.tecsup.huellitasvet.viewmodel.AgendaViewModel
+import com.tecsup.huellitasvet.viewmodel.AtenderCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
+import com.tecsup.huellitasvet.viewmodel.PacientesViewModel
 import com.tecsup.huellitasvet.viewmodel.PanelViewModel
 import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
@@ -224,8 +228,15 @@ fun NavVet(sesionVm: SesionViewModel) {
                 val vm = vetViewModel { app -> AgendaViewModel(app.repository) }
                 AgendaScreen(vm, onAtender = { nav.navigate(Rutas.atender(it)) })
             }
-            composable(Rutas.ATENDER, arguments = argId) { EnConstruccion("Atender cita") }
-            composable(Rutas.PACIENTES) { EnConstruccion("Pacientes") }
+            composable(Rutas.ATENDER, arguments = argId) { entrada ->
+                val id = entrada.arguments?.getInt("id") ?: -1
+                val vm = vetViewModel { app -> AtenderCitaViewModel(app.repository, id) }
+                AtenderCitaScreen(vm, onVolver = { nav.popBackStack() })
+            }
+            composable(Rutas.PACIENTES) {
+                val vm = vetViewModel { app -> PacientesViewModel(app.repository) }
+                PacientesScreen(vm, onFicha = { nav.navigate(Rutas.ficha(it)) })
+            }
             composable(Rutas.SERVICIOS) {
                 val vm = vetViewModel { app -> ServiciosViewModel(app.repository) }
                 ServiciosScreen(vm, onEditar = { /* Paso 13 */ })
