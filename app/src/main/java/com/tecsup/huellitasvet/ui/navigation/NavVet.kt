@@ -43,11 +43,13 @@ import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.InicioScreen
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
 import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
+import com.tecsup.huellitasvet.ui.dueno.MisCitasScreen
 import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
+import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
 import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
@@ -202,7 +204,11 @@ fun NavVet(sesionVm: SesionViewModel) {
                     }
                 )
             }
-            composable(Rutas.MIS_CITAS) { EnConstruccion("Mis citas") }
+            composable(Rutas.MIS_CITAS) {
+                val u = usuario ?: return@composable
+                val vm = vetViewModel { app -> MisCitasViewModel(app.repository, u.id) }
+                MisCitasScreen(vm, onPedirCita = { nav.navigate(Rutas.pedirCita()) })
+            }
             composable(Rutas.PERFIL) { EnConstruccion("Perfil") }
 
             // ================= Veterinario =================
