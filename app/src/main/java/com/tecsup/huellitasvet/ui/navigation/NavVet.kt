@@ -38,12 +38,15 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tecsup.huellitasvet.model.Rol
+import com.tecsup.huellitasvet.ui.dueno.FichaMascotaScreen
+import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.InicioScreen
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
 import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
+import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
@@ -153,8 +156,33 @@ fun NavVet(sesionVm: SesionViewModel) {
                     onAgregar = { nav.navigate(Rutas.formMascota()) }
                 )
             }
-            composable(Rutas.FORM_MASCOTA, arguments = argId) { EnConstruccion("Nueva mascota") }
-            composable(Rutas.FICHA, arguments = argId) { EnConstruccion("Ficha") }
+            composable(Rutas.FORM_MASCOTA, arguments = argId) { entrada ->
+                val u = usuario ?: return@composable
+                val id = entrada.arguments?.getInt("id") ?: -1
+                val vm = vetViewModel { app -> MascotaViewModel(app.repository, u.id, id.takeIf { it > 0 }) }
+                FormularioMascotaScreen(
+                    vm = vm,
+                    esEdicion = id > 0,
+                    onVolver = { nav.popBackStack() },
+                    onEliminada = {
+                        // Se eliminó desde 'Editar': también se cierra la ficha de esa mascota
+                        if (!nav.popBackStack(Rutas.FICHA, inclusive = true)) nav.popBackStack()
+                    }
+                )
+            }
+            composable(Rutas.FICHA, arguments = argId) { entrada ->
+                val u = usuario ?: return@composable
+                val id = entrada.arguments?.getInt("id") ?: -1
+                val vm = vetViewModel { app -> MascotaViewModel(app.repository, u.id, id) }
+                FichaMascotaScreen(
+                    vm = vm,
+                    mascotaId = id,
+                    esVeterinario = esVet,
+                    onVolver = { nav.popBackStack() },
+                    onPedirCita = { nav.navigate(Rutas.pedirCita(id)) },
+                    onEditar = { nav.navigate(Rutas.formMascota(id)) }
+                )
+            }
             composable(Rutas.PEDIR_CITA, arguments = argMascotaId) { EnConstruccion("Pedir cita") }
             composable(Rutas.MIS_CITAS) { EnConstruccion("Mis citas") }
             composable(Rutas.PERFIL) { EnConstruccion("Perfil") }
