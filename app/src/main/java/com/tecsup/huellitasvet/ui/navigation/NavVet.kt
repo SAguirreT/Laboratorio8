@@ -46,10 +46,14 @@ import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
 import com.tecsup.huellitasvet.ui.dueno.MisCitasScreen
 import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
+import com.tecsup.huellitasvet.ui.veterinario.AgendaScreen
+import com.tecsup.huellitasvet.ui.veterinario.PanelScreen
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
+import com.tecsup.huellitasvet.viewmodel.AgendaViewModel
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
+import com.tecsup.huellitasvet.viewmodel.PanelViewModel
 import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
@@ -212,8 +216,14 @@ fun NavVet(sesionVm: SesionViewModel) {
             composable(Rutas.PERFIL) { EnConstruccion("Perfil") }
 
             // ================= Veterinario =================
-            composable(Rutas.PANEL) { EnConstruccion("Panel") }
-            composable(Rutas.AGENDA) { EnConstruccion("Agenda") }
+            composable(Rutas.PANEL) {
+                val vm = vetViewModel { app -> PanelViewModel(app.repository) }
+                PanelScreen(vm, onVerAgenda = { nav.irAPestana(Rutas.AGENDA, inicio) })
+            }
+            composable(Rutas.AGENDA) {
+                val vm = vetViewModel { app -> AgendaViewModel(app.repository) }
+                AgendaScreen(vm, onAtender = { nav.navigate(Rutas.atender(it)) })
+            }
             composable(Rutas.ATENDER, arguments = argId) { EnConstruccion("Atender cita") }
             composable(Rutas.PACIENTES) { EnConstruccion("Pacientes") }
             composable(Rutas.SERVICIOS) {
