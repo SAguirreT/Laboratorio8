@@ -1,7 +1,5 @@
 package com.tecsup.huellitasvet.ui.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -27,7 +25,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
@@ -37,6 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.tecsup.huellitasvet.model.EstadoCita
 import com.tecsup.huellitasvet.model.Rol
 import com.tecsup.huellitasvet.ui.dueno.FichaMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
@@ -45,9 +43,12 @@ import com.tecsup.huellitasvet.ui.dueno.LoginScreen
 import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
 import com.tecsup.huellitasvet.ui.dueno.MisCitasScreen
 import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
+import com.tecsup.huellitasvet.ui.dueno.PerfilScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.veterinario.AgendaScreen
+import com.tecsup.huellitasvet.ui.veterinario.AjustesScreen
 import com.tecsup.huellitasvet.ui.veterinario.AtenderCitaScreen
+import com.tecsup.huellitasvet.ui.veterinario.FormularioServicioScreen
 import com.tecsup.huellitasvet.ui.veterinario.PacientesScreen
 import com.tecsup.huellitasvet.ui.veterinario.PanelScreen
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
@@ -217,7 +218,21 @@ fun NavVet(sesionVm: SesionViewModel) {
                 val vm = vetViewModel { app -> MisCitasViewModel(app.repository, u.id) }
                 MisCitasScreen(vm, onPedirCita = { nav.navigate(Rutas.pedirCita()) })
             }
-            composable(Rutas.PERFIL) { EnConstruccion("Perfil") }
+            composable(Rutas.PERFIL) {
+                val u = usuario ?: return@composable
+                val inicioVm = vetViewModel { app -> InicioViewModel(app.repository, app.preferencias, u.id) }
+                val citasVm = vetViewModel { app -> MisCitasViewModel(app.repository, u.id) }
+                val mascotas by inicioVm.mascotas.collectAsState()
+                val proximas by citasVm.proximas.collectAsState()
+                val historial by citasVm.historial.collectAsState()
+                PerfilScreen(
+                    usuario = u,
+                    sesionVm = sesionVm,
+                    mascotas = mascotas.size,
+                    proximas = proximas.size,
+                    atenciones = historial.count { it.cita.estado == EstadoCita.ATENDIDA.name }
+                )
+            }
 
             // ================= Veterinario =================
             composable(Rutas.PANEL) {
@@ -239,10 +254,21 @@ fun NavVet(sesionVm: SesionViewModel) {
             }
             composable(Rutas.SERVICIOS) {
                 val vm = vetViewModel { app -> ServiciosViewModel(app.repository) }
-                ServiciosScreen(vm, onEditar = { /* Paso 13 */ })
+                ServiciosScreen(
+                    vm,
+                    onEditar = { nav.navigate(Rutas.formServicio(it)) },
+                    onNuevo = { nav.navigate(Rutas.formServicio()) }
+                )
             }
-            composable(Rutas.FORM_SERVICIO, arguments = argId) { EnConstruccion("Servicio") }
-            composable(Rutas.AJUSTES) { EnConstruccion("Ajustes") }
+            composable(Rutas.FORM_SERVICIO, arguments = argId) { entrada ->
+                val id = entrada.arguments?.getInt("id") ?: -1
+                val vm = vetViewModel { app -> ServiciosViewModel(app.repository) }
+                FormularioServicioScreen(vm, servicioId = id, onVolver = { nav.popBackStack() })
+            }
+            composable(Rutas.AJUSTES) {
+                val u = usuario ?: return@composable
+                AjustesScreen(u, sesionVm)
+            }
         }
     }
 }
@@ -253,13 +279,5 @@ private fun NavHostController.irAPestana(ruta: String, inicio: String) {
         popUpTo(inicio) { saveState = true }
         launchSingleTop = true
         restoreState = true
-    }
-}
-
-/** Marcador temporal para las pantallas de los pasos siguientes. */
-@Composable
-private fun EnConstruccion(titulo: String) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("$titulo: próximamente", color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

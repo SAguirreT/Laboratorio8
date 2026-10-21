@@ -1,5 +1,6 @@
 package com.tecsup.huellitasvet.ui.veterinario
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,10 +26,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.tecsup.huellitasvet.data.local.entity.Servicio
 import com.tecsup.huellitasvet.ui.components.AppTopBar
@@ -43,6 +46,14 @@ fun ServiciosScreen(
     onNuevo: () -> Unit = {}
 ) {
     val servicios by vm.servicios.collectAsState()
+    val mensaje by vm.mensaje.collectAsState()
+    val contexto = LocalContext.current
+    LaunchedEffect(mensaje) {
+        mensaje?.let {
+            Toast.makeText(contexto, it, Toast.LENGTH_SHORT).show()
+            vm.limpiarMensaje()
+        }
+    }
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             AppTopBar("Servicios")
