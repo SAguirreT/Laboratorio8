@@ -40,6 +40,8 @@ import com.tecsup.huellitasvet.ui.components.MascotaAvatar
 import com.tecsup.huellitasvet.ui.components.SelectorSegmentado
 import com.tecsup.huellitasvet.ui.components.VarianteBoton
 import com.tecsup.huellitasvet.ui.components.VetButton
+import com.tecsup.huellitasvet.ui.components.graficos.DatoGrafico
+import com.tecsup.huellitasvet.ui.components.graficos.GraficoLineas
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 
 /** Ficha de la mascota: cabecera, acciones y pestañas Datos / Historial clínico. */
@@ -54,6 +56,7 @@ fun FichaMascotaScreen(
 ) {
     val mascota by vm.mascota.collectAsState()
     val historial by vm.historial(mascotaId).collectAsState()
+    val pesos by vm.pesos(mascotaId).collectAsState()
     var pestana by rememberSaveable { mutableIntStateOf(0) }
 
     Column(Modifier.fillMaxSize()) {
@@ -74,7 +77,12 @@ fun FichaMascotaScreen(
                 }
             }
             SelectorSegmentado(listOf("Datos", "Historial clínico"), pestana, { pestana = it })
-            if (pestana == 0) DatosMascota(m, historial.size) else HistorialClinico(historial)
+            if (pestana == 0) {
+                DatosMascota(m, historial.size)
+                EvolucionPeso(pesos)
+            } else {
+                HistorialClinico(historial)
+            }
         }
     }
 }
@@ -129,6 +137,32 @@ private fun DatosMascota(m: Mascota, atenciones: Int) {
                     Text(valor, style = MaterialTheme.typography.titleSmall)
                 }
                 if (i < filas.lastIndex) HorizontalDivider(color = colores.outline)
+            }
+        }
+    }
+}
+
+/** Mejora IA: línea con el peso registrado en cada atención. */
+@Composable
+private fun EvolucionPeso(pesos: List<DatoGrafico>) {
+    val colores = MaterialTheme.colorScheme
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = colores.surface,
+        border = BorderStroke(1.dp, colores.outline),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text("Evolución del peso", style = MaterialTheme.typography.titleSmall)
+            Spacer(Modifier.height(10.dp))
+            if (pesos.size < 2) {
+                Text(
+                    "Se mostrará cuando tenga al menos 2 atenciones con peso",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colores.onSurfaceVariant
+                )
+            } else {
+                GraficoLineas(pesos, unidad = " kg")
             }
         }
     }

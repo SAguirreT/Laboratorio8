@@ -5,13 +5,16 @@ import androidx.lifecycle.viewModelScope
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
 import com.tecsup.huellitasvet.data.repository.VetRepository
+import com.tecsup.huellitasvet.ui.components.graficos.DatoGrafico
 import com.tecsup.huellitasvet.model.Especie
+import com.tecsup.huellitasvet.model.Fechas
 import com.tecsup.huellitasvet.model.Sexo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -58,6 +61,15 @@ class MascotaViewModel(
     /** Historial clínico (citas ATENDIDAS, la más reciente primero). Se crea una vez por mascota. */
     fun historial(mascotaId: Int): StateFlow<List<CitaConDetalle>> = historiales.getOrPut(mascotaId) {
         repo.observarHistorial(mascotaId)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }
+
+    private val pesosPorMascota = mutableMapOf<Int, StateFlow<List<DatoGrafico>>>()
+
+    /** Mejora IA: puntos del gráfico de peso (fecha corta -> kg) de las atenciones de la mascota. */
+    fun pesos(mascotaId: Int): StateFlow<List<DatoGrafico>> = pesosPorMascota.getOrPut(mascotaId) {
+        repo.observarPesos(mascotaId)
+            .map { lista -> lista.takeLast(6).map { DatoGrafico(Fechas.diaMes(it.fecha), it.peso.toFloat()) } }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     }
 
