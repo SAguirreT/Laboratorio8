@@ -43,10 +43,12 @@ import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.InicioScreen
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
 import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
+import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
+import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
@@ -183,7 +185,23 @@ fun NavVet(sesionVm: SesionViewModel) {
                     onEditar = { nav.navigate(Rutas.formMascota(id)) }
                 )
             }
-            composable(Rutas.PEDIR_CITA, arguments = argMascotaId) { EnConstruccion("Pedir cita") }
+            composable(Rutas.PEDIR_CITA, arguments = argMascotaId) { entrada ->
+                val u = usuario ?: return@composable
+                val mascotaId = entrada.arguments?.getInt("mascotaId") ?: -1
+                val vm = vetViewModel { app ->
+                    PedirCitaViewModel(app.repository, app.preferencias, u.id, mascotaId.takeIf { it > 0 })
+                }
+                PedirCitaScreen(
+                    vm = vm,
+                    onVolver = { nav.popBackStack() },
+                    onCreada = {
+                        nav.navigate(Rutas.MIS_CITAS) {
+                            popUpTo(Rutas.INICIO)
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
             composable(Rutas.MIS_CITAS) { EnConstruccion("Mis citas") }
             composable(Rutas.PERFIL) { EnConstruccion("Perfil") }
 
