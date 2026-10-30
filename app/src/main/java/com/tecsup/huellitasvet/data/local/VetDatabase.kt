@@ -13,9 +13,23 @@ import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
 import com.tecsup.huellitasvet.data.local.entity.Usuario
 
-/**
- * version = 2 porque el proyecto base ya creó la base solo con 'servicios'.
- * fallbackToDestructiveMigration() la vuelve a crear (en práctica no hay datos reales que perder).
+/*
+ * COMMIT 4 - feat(data): registra entidades y siembra datos iniciales en VetDatabase
+ * Rama: main
+ * Hash: 005fb16
+ *
+ * ¿QUÉ SE REALIZÓ?
+ * Se configuró VetDatabase registrando las entidades (Servicio, Usuario, Mascota, Cita) y versión de esquema 2.
+ *
+ * ¿POR QUÉ?
+ * Para inicializar SQLite con Room Singleton y permitir la precarga automática de datos de prueba.
+ *
+ * ARCHIVOS RELACIONADOS DEL MISMO COMMIT:
+ * - VetDatabase.kt
+ * - DatosIniciales.kt
+ *
+ * RELACIÓN:
+ * VetDatabase expone los DAOs y ejecuta la siembra inicial a través de DatosIniciales.
  */
 @Database(
     entities = [Servicio::class, Usuario::class, Mascota::class, Cita::class],
@@ -32,7 +46,6 @@ abstract class VetDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: VetDatabase? = null
 
-        /** Singleton: una sola instancia de la base para toda la app. */
         fun obtener(context: Context): VetDatabase = INSTANCE ?: synchronized(this) {
             INSTANCE ?: Room.databaseBuilder(
                 context.applicationContext,

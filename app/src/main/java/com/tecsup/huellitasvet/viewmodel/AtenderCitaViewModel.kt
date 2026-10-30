@@ -13,17 +13,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/** Data Class para errores de validación en la atención clínica. */
 data class ErroresAtencion(
     val diagnostico: String? = null,
     val peso: String? = null
 )
 
-/** Registro clínico de una cita. */
+/**
+ * ViewModel que controla la pantalla de atención médica (`AtenderCitaScreen`).
+ * Valida los datos clínicos ingresados (diagnóstico y peso) e invoca la transacción
+ * atómica en el repositorio para marcar la cita como ATENDIDA y actualizar el peso de la mascota.
+ */
 class AtenderCitaViewModel(
     private val repo: VetRepository,
     citaId: Int
 ) : ViewModel() {
 
+    /** Observa la cita actual con todos sus detalles (Mascota, Dueño y Servicio). */
     val cita: StateFlow<CitaConDetalle?> = repo.observarCita(citaId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
@@ -33,13 +39,15 @@ class AtenderCitaViewModel(
     private val _mensaje = MutableStateFlow<String?>(null)
     val mensaje: StateFlow<String?> = _mensaje.asStateFlow()
 
-    /** true cuando se registró o canceló: la pantalla vuelve a la agenda. */
+    /** Flag de cierre que notifica a la UI para regresar a la agenda (`onVolver`). */
     private val _terminado = MutableStateFlow(false)
     val terminado: StateFlow<Boolean> = _terminado.asStateFlow()
 
     /**
-     * Diagnóstico de al menos 5 caracteres y peso > 0. Solo citas PENDIENTE o CONFIRMADA.
-     * repo.registrarAtencion hace todo en UNA transacción (cita ATENDIDA + peso de la mascota).
+     * Valida e ingresa los registros de la atención médica:
+     * - Diagnóstico debe tener al menos 5 caracteres.
+     * - Peso debe ser mayor a 0.
+     * Invoca `repo.registrarAtencion` que ejecuta ambas escrituras dentro de una única transacción `db.withTransaction`.
      */
     fun registrar(diagnostico: String, tratamiento: String, pesoTexto: String) {
         val c = cita.value ?: return
@@ -66,6 +74,7 @@ class AtenderCitaViewModel(
         }
     }
 
+    /** Permite cancelar la cita activa desde la pantalla de atención. */
     fun cancelar() {
         val c = cita.value ?: return
         if (!c.estado.esActiva) return
@@ -76,6 +85,7 @@ class AtenderCitaViewModel(
         }
     }
 
+    /** Limpia los mensajes flotantes de notificación. */
     fun limpiarMensaje() {
         _mensaje.value = null
     }

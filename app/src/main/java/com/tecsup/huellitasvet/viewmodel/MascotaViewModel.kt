@@ -16,7 +16,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-/** Errores del formulario, uno por campo (null = sin error). */
+/**
+ * Data Class de soporte para encapsular las validaciones del formulario de mascotas.
+ * Mantiene un mensaje de error individual por cada campo para ser mostrado bajo el componente UI.
+ */
 data class ErroresMascota(
     val nombre: String? = null,
     val especie: String? = null,
@@ -24,12 +27,13 @@ data class ErroresMascota(
     val anio: String? = null,
     val peso: String? = null
 ) {
+    /** Devuelve true si al menos un campo presenta alguna inconsistencia o error de validación. */
     val hayErrores: Boolean get() = listOf(nombre, especie, sexo, anio, peso).any { it != null }
 }
 
 /**
- * Registrar/editar una mascota y ver su ficha con historial.
- * @param mascotaId id de la mascota a editar o ver; null si es una mascota nueva.
+ * ViewModel encargado del registro, edición, eliminación y visualización de la ficha de una mascota.
+ * Contiene el historial de atenciones clínicas de la mascota observada desde Room.
  */
 class MascotaViewModel(
     private val repo: VetRepository,
@@ -37,31 +41,46 @@ class MascotaViewModel(
     private val mascotaId: Int?
 ) : ViewModel() {
 
+    /** Observa la mascota específica desde Room si `mascotaId` no es nulo, de lo contrario emite null. */
     val mascota: StateFlow<Mascota?> = (if (mascotaId != null) repo.observarMascota(mascotaId) else flowOf(null))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    /** Estado reactivo con los errores de validación activos para la pantalla del formulario. */
     private val _errores = MutableStateFlow(ErroresMascota())
     val errores: StateFlow<ErroresMascota> = _errores.asStateFlow()
 
+    /** Notificaciones informativas o advertencias hacia el usuario (por ejemplo, imposibilidad de borrar). */
     private val _mensaje = MutableStateFlow<String?>(null)
     val mensaje: StateFlow<String?> = _mensaje.asStateFlow()
 
-    /** true cuando se guardó: la pantalla vuelve atrás. */
+    /** Flag de éxito al guardar para detonar la navegación hacia atrás en Compose (`popBackStack`). */
     private val _guardado = MutableStateFlow(false)
     val guardado: StateFlow<Boolean> = _guardado.asStateFlow()
 
+    /** Flag de éxito tras eliminar para cerrar pantallas vinculadas. */
     private val _eliminado = MutableStateFlow(false)
     val eliminado: StateFlow<Boolean> = _eliminado.asStateFlow()
 
+    /** Caché en memoria para retener los StateFlows de historiales de atenciones generados por ID de mascota. */
     private val historiales = mutableMapOf<Int, StateFlow<List<CitaConDetalle>>>()
 
-    /** Historial clínico (citas ATENDIDAS, la más reciente primero). Se crea una vez por mascota. */
+    /**
+     * Devuelve el historial de atenciones clínicas (citas en estado 'ATENDIDA') de la mascota.
+     * Utiliza memorización en mapa para no duplicar suscripciones de Flow al recomponer.
+     */
     fun historial(mascotaId: Int): StateFlow<List<CitaConDetalle>> = historiales.getOrPut(mascotaId) {
         repo.observarHistorial(mascotaId)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     }
 
-    /** Valida cada campo y, si todo está bien, inserta o actualiza. */
+    /**
+     * Valida minuciosamente cada campo ingresado:
+     * - Nombre >= 2 caracteres.
+     * - Especie y Sexo seleccionados obligatoriamente.
+     * - Año de nacimiento entre 1990 y el año actual.
+     * - Peso numérico positivo (> 0.0).
+     * Si todo es correcto, ejecuta el guardado en base de datos e informa a `_guardado`.
+     */
     fun guardar(
         nombre: String,
         especie: Especie?,
@@ -99,7 +118,11 @@ class MascotaViewModel(
         }
     }
 
-    /** Solo se elimina si no tiene citas; si tiene, se muestra un mensaje. */
+    /**
+     * Elimina el registro de la mascota.
+     * Verifica previamente en Room si la mascota posee citas asociadas. Si existen registros,
+     * se bloquea el borrado por integridad de clave foránea y muestra un mensaje al usuario.
+     */
     fun eliminar(m: Mascota) {
         viewModelScope.launch {
             if (repo.mascotaTieneCitas(m.id)) {
@@ -111,6 +134,7 @@ class MascotaViewModel(
         }
     }
 
+    /** Resetea el mensaje informativo mostrado en Toast. */
     fun limpiarMensaje() {
         _mensaje.value = null
     }

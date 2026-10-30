@@ -34,6 +34,11 @@ import com.tecsup.huellitasvet.ui.dueno.edadTexto
 import com.tecsup.huellitasvet.viewmodel.PacienteUi
 import com.tecsup.huellitasvet.viewmodel.PacientesViewModel
 
+/**
+ * Pantalla de directorio de Pacientes para el Veterinario (`PacientesScreen`).
+ * Incluye un campo de búsqueda por texto y chips de filtro por especie (Perros, Gatos, Otros),
+ * actualizando reactivamente la lista mediante el ViewModel.
+ */
 @Composable
 fun PacientesScreen(vm: PacientesViewModel, onFicha: (Int) -> Unit) {
     val texto by vm.texto.collectAsState()
@@ -43,7 +48,9 @@ fun PacientesScreen(vm: PacientesViewModel, onFicha: (Int) -> Unit) {
     Column(Modifier.fillMaxSize()) {
         AppTopBar("Pacientes")
         Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            /** Campo de entrada de texto para buscar por nombre de paciente o dueño. */
             VetTextField(texto, vm::buscar, "Buscar mascota o dueño...", icono = Icons.Filled.Search)
+            /** Fila de chips de filtro por categoría de especie. */
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OpcionChip("Todos", especie == null, onClick = { vm.filtrar(null) })
                 OpcionChip("Perros", especie == Especie.PERRO, onClick = { vm.filtrar(Especie.PERRO) })
@@ -67,6 +74,7 @@ fun PacientesScreen(vm: PacientesViewModel, onFicha: (Int) -> Unit) {
     }
 }
 
+/** Componente de tarjeta para presentar la información resumida de cada paciente y su última atención. */
 @Composable
 private fun TarjetaPaciente(p: PacienteUi, onClick: () -> Unit) {
     val colores = MaterialTheme.colorScheme

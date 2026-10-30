@@ -64,8 +64,10 @@ import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
 
+/** Estructura de datos para definir los elementos de la barra de navegación inferior. */
 private data class Pestana(val ruta: String, val etiqueta: String, val icono: ImageVector)
 
+/** Pestañas visibles en la barra inferior para el rol CLIENTE (dueño de mascota). */
 private val PESTANAS_DUENO = listOf(
     Pestana(Rutas.INICIO, "Inicio", Icons.Filled.Home),
     Pestana(Rutas.MASCOTAS, "Mascotas", Icons.Filled.Pets),
@@ -73,6 +75,7 @@ private val PESTANAS_DUENO = listOf(
     Pestana(Rutas.PERFIL, "Perfil", Icons.Filled.Person)
 )
 
+/** Pestañas visibles en la barra inferior para el rol ADMIN (veterinario). */
 private val PESTANAS_VET = listOf(
     Pestana(Rutas.PANEL, "Panel", Icons.Filled.BarChart),
     Pestana(Rutas.AGENDA, "Agenda", Icons.Filled.Event),
@@ -81,10 +84,15 @@ private val PESTANAS_VET = listOf(
     Pestana(Rutas.AJUSTES, "Ajustes", Icons.Filled.Settings)
 )
 
-/** Lee un argumento Int de la ruta; -1 significa 'no viene' (por ejemplo, mascota nueva). */
+/** Definición estandarizada de argumentos de navegación para enteros (ID). */
 private val argId = listOf(navArgument("id") { type = NavType.IntType; defaultValue = -1 })
 private val argMascotaId = listOf(navArgument("mascotaId") { type = NavType.IntType; defaultValue = -1 })
 
+/**
+ * Componente principal de navegación de la aplicación (`NavVet`).
+ * Configura el `NavHost`, renderiza dinámicamente la barra de navegación inferior según el rol
+ * autenticado y gestiona la redirección inicial entre Splash, Login y los flujos principales.
+ */
 @Composable
 fun NavVet(sesionVm: SesionViewModel) {
     val nav = rememberNavController()
@@ -93,11 +101,13 @@ fun NavVet(sesionVm: SesionViewModel) {
     val oscuro by sesionVm.modoOscuro.collectAsState()
 
     var splashListo by rememberSaveable { mutableStateOf(false) }
-    // id del usuario cuya pantalla principal ya se abrió (0 = sin sesión, -1 = ninguno aún)
     var sesionAplicada by rememberSaveable { mutableIntStateOf(-1) }
 
-    // Un solo lugar decide a dónde ir: login, inicio del dueño o panel del veterinario.
-    // Se dispara al terminar el Splash, al iniciar sesión, al cambiar de perfil y al cerrar sesión.
+    /**
+     * Efeuctúa la redirección automática basada en la sesión:
+     * Al terminar la pantalla Splash, decide si navegar hacia LOGIN, PANEL (Veterinario) o INICIO (Dueño).
+     * Limpia la pila de navegación (`popUpTo`) para evitar que el botón atrás regrese al Splash o Login.
+     */
     LaunchedEffect(splashListo, cargando, usuario?.id) {
         if (!splashListo || cargando) return@LaunchedEffect
         val u = usuario
@@ -110,7 +120,7 @@ fun NavVet(sesionVm: SesionViewModel) {
             else -> Rutas.INICIO
         }
         nav.navigate(destino) {
-            popUpTo(nav.graph.id) { inclusive = true } // limpia la pila
+            popUpTo(nav.graph.id) { inclusive = true }
             launchSingleTop = true
         }
     }
@@ -184,7 +194,6 @@ fun NavVet(sesionVm: SesionViewModel) {
                     esEdicion = id > 0,
                     onVolver = { nav.popBackStack() },
                     onEliminada = {
-                        // Se eliminó desde 'Editar': también se cierra la ficha de esa mascota
                         if (!nav.popBackStack(Rutas.FICHA, inclusive = true)) nav.popBackStack()
                     }
                 )
@@ -279,7 +288,7 @@ fun NavVet(sesionVm: SesionViewModel) {
     }
 }
 
-/** Navegación entre pestañas: no apila pantallas y recuerda el estado de cada pestaña. */
+/** Navega entre pestañas principales conservando el estado y evitando acumulaciones en la pila (`saveState` y `restoreState`). */
 private fun NavHostController.irAPestana(ruta: String, inicio: String) {
     navigate(ruta) {
         popUpTo(inicio) { saveState = true }

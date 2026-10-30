@@ -1,4 +1,4 @@
-package com.tecsup.huellitasvet.ui.components
+ package com.tecsup.huellitasvet.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Colorize

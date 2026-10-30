@@ -30,9 +30,9 @@ import com.tecsup.huellitasvet.ui.components.VetButton
 import kotlinx.coroutines.delay
 
 /**
- * Pantalla de inicio.
- * - Si ya hay una sesión guardada, salta sola a la pantalla principal (no muestra botones).
- * - Si no hay sesión, muestra 'Comenzar' y 'Ya tengo una cuenta', que llevan al login.
+ * Pantalla de inicio (Splash) de la aplicación.
+ * Presenta la identidad visual del sistema. Si detecta una sesión guardada previamente en DataStore,
+ * espera 1 segundo y navega automáticamente a la pantalla principal sin requerir reautenticación.
  */
 @Composable
 fun SplashScreen(
@@ -40,6 +40,7 @@ fun SplashScreen(
     haySesion: Boolean,
     onContinuar: () -> Unit
 ) {
+    /** Efecto de inicio: si ya existe una sesión guardada, aguarda un delay estético de 1s y gatilla `onContinuar`. */
     LaunchedEffect(cargando, haySesion) {
         if (!cargando && haySesion) {
             delay(1000)
@@ -76,6 +77,7 @@ fun SplashScreen(
             }
         }
         Spacer(Modifier.weight(1f))
+        /** Si no hay sesión activa y terminó la carga inicial, muestra los botones de ingreso. */
         if (!cargando && !haySesion) {
             VetButton("Comenzar", onClick = onContinuar)
             TextButton(onClick = onContinuar, modifier = Modifier.padding(top = 4.dp)) {

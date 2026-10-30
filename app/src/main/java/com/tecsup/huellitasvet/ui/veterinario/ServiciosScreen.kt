@@ -38,7 +38,11 @@ import com.tecsup.huellitasvet.ui.components.AppTopBar
 import com.tecsup.huellitasvet.ui.components.iconoServicio
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 
-/** La View solo observa el estado del ViewModel y le avisa los eventos. */
+/**
+ * Pantalla de gestión del catálogo de servicios clínicos (`ServiciosScreen`).
+ * Despliega la lista de prestaciones con sus precios, duraciones e íconos,
+ * e incluye un conmutador (`Switch`) para activar o desactivar cada servicio en tiempo real.
+ */
 @Composable
 fun ServiciosScreen(
     vm: ServiciosViewModel,
@@ -66,6 +70,7 @@ fun ServiciosScreen(
                 }
             }
         }
+        /** Botón flotante para dar de alta un nuevo servicio. */
         FloatingActionButton(
             onClick = onNuevo,
             containerColor = MaterialTheme.colorScheme.primary,
@@ -76,6 +81,7 @@ fun ServiciosScreen(
     }
 }
 
+/** Componente de ítem para visualizar los detalles de un servicio y conmutar su estado de activación. */
 @Composable
 fun ServicioItem(s: Servicio, onToggle: () -> Unit, onEditar: () -> Unit) {
     val colores = MaterialTheme.colorScheme

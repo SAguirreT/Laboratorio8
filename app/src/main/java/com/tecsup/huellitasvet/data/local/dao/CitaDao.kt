@@ -10,6 +10,29 @@ import com.tecsup.huellitasvet.model.ConteoServicio
 import com.tecsup.huellitasvet.model.UltimaVisita
 import kotlinx.coroutines.flow.Flow
 
+/*
+ * COMMIT 3 - feat(data): agrega DAOs y relaciones CitaConDetalle y MascotaConDueno
+ * Rama: main
+ * Hash: 4d9158f
+ *
+ * ¿QUÉ SE REALIZÓ?
+ * Se construyó CitaDao con métodos de agendamiento, actualización de atención, consultas de disponibilidad de horarios
+ * y agregaciones estadísticas SQL para el dashboard del veterinario.
+ *
+ * ¿POR QUÉ?
+ * Para soportar el flujo médico completo de citas (agendamiento, verificación de cupos, atenciones y cálculo de ingresos).
+ *
+ * ARCHIVOS RELACIONADOS DEL MISMO COMMIT:
+ * - UsuarioDao.kt
+ * - MascotaDao.kt
+ * - CitaDao.kt
+ * - MascotaConDueno.kt
+ * - CitaConDetalle.kt
+ * - UltimaVisita.kt
+ *
+ * RELACIÓN:
+ * CitaDao ejecuta consultas `@Transaction` uniendo Cita, Mascota, Usuario y Servicio mediante `CitaConDetalle`.
+ */
 @Dao
 interface CitaDao {
 
@@ -33,7 +56,6 @@ interface CitaDao {
     suspend fun obtener(id: Int): Cita?
 
     // ---------- Horarios ----------
-    /** Cuántas citas NO canceladas hay en esa fecha y hora (0 = libre). */
     @Query("SELECT COUNT(*) FROM citas WHERE fecha = :fecha AND hora = :hora AND estado != 'CANCELADA'")
     suspend fun contarOcupadas(fecha: String, hora: String): Int
 
@@ -56,7 +78,6 @@ interface CitaDao {
     @Query("SELECT * FROM citas WHERE id = :id")
     fun observarUna(id: Int): Flow<CitaConDetalle?>
 
-    /** Historial clínico: solo ATENDIDA, la más reciente primero. */
     @Transaction
     @Query("SELECT * FROM citas WHERE mascotaId = :mascotaId AND estado = 'ATENDIDA' ORDER BY fecha DESC, hora DESC")
     fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>>
@@ -75,7 +96,6 @@ interface CitaDao {
     )
     fun contarPorServicio(): Flow<List<ConteoServicio>>
 
-    /** Suma del precio de las citas ATENDIDAS desde una fecha. COALESCE evita el null si no hay. */
     @Query("SELECT COALESCE(SUM(precio), 0.0) FROM citas WHERE estado = 'ATENDIDA' AND fecha >= :fechaInicio")
     fun ingresosDesde(fechaInicio: String): Flow<Double>
 

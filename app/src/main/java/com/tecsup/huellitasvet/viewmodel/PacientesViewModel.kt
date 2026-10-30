@@ -12,22 +12,38 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
-/** Un paciente para la lista: mascota con dueño y la fecha de su última visita (o null). */
+/**
+ * Modelo de representación UI para la lista de pacientes del veterinario.
+ * Asocia la entidad relacional `MascotaConDueno` con la fecha en texto de su última atención médica.
+ */
 data class PacienteUi(
     val datos: MascotaConDueno,
     val ultimaVisita: String?
 )
 
-/** Lista de pacientes filtrada por texto y por especie al mismo tiempo (combine). */
+/**
+ * ViewModel que gestiona la lista de pacientes (`PacientesScreen`).
+ * Implementa filtrado reactivo simultáneo por texto (búsqueda por nombre de mascota o dueño)
+ * y por categoría de especie mediante el operador `combine`.
+ */
 class PacientesViewModel(repo: VetRepository) : ViewModel() {
 
+    /** Estado interno mutable para la búsqueda por texto. */
     private val _texto = MutableStateFlow("")
     val texto: StateFlow<String> = _texto.asStateFlow()
 
-    /** null = Todos. */
+    /** Estado interno mutable para el filtro de especie seleccionada (null representa 'Todos'). */
     private val _especie = MutableStateFlow<Especie?>(null)
     val especie: StateFlow<Especie?> = _especie.asStateFlow()
 
+    /**
+     * Combina 4 flujos en tiempo real:
+     * 1. Lista de todas las mascotas con sus dueños.
+     * 2. Mapeo de últimas visitas atendidas por mascota.
+     * 3. Texto ingresado en el buscador.
+     * 4. Especie seleccionada.
+     * Aplica los filtros de especie y coincidencia de texto sobre nombre de mascota o dueño.
+     */
     val pacientes: StateFlow<List<PacienteUi>> = combine(
         repo.observarTodasLasMascotas(),
         repo.observarUltimasVisitas(),
@@ -46,10 +62,12 @@ class PacientesViewModel(repo: VetRepository) : ViewModel() {
             .map { PacienteUi(it, ultima[it.mascota.id]) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    /** Actualiza la consulta de búsqueda de texto. */
     fun buscar(t: String) {
         _texto.value = t
     }
 
+    /** Asigna el filtro de especie. */
     fun filtrar(e: Especie?) {
         _especie.value = e
     }

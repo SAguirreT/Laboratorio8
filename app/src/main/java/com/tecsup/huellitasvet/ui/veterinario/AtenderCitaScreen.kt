@@ -46,6 +46,11 @@ import com.tecsup.huellitasvet.ui.dueno.edadTexto
 import com.tecsup.huellitasvet.ui.theme.EstadoCancelada
 import com.tecsup.huellitasvet.viewmodel.AtenderCitaViewModel
 
+/**
+ * Pantalla de registro de atención clínica (`AtenderCitaScreen`).
+ * Permite al veterinario ingresar el peso controlado, el diagnóstico y el tratamiento.
+ * Al confirmar la atención, ejecuta de manera atómica la actualización de la cita y el nuevo peso de la mascota.
+ */
 @Composable
 fun AtenderCitaScreen(vm: AtenderCitaViewModel, onVolver: () -> Unit) {
     val cita by vm.cita.collectAsState()
@@ -78,7 +83,7 @@ fun AtenderCitaScreen(vm: AtenderCitaViewModel, onVolver: () -> Unit) {
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Cabecera
+            // Cabecera con datos del paciente, dueño y servicio
             Surface(shape = RoundedCornerShape(18.dp), color = colores.surface, border = BorderStroke(1.dp, colores.outline), modifier = Modifier.fillMaxWidth()) {
                 Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                     MascotaAvatar(m.especie, tamano = 60.dp)
@@ -100,6 +105,7 @@ fun AtenderCitaScreen(vm: AtenderCitaViewModel, onVolver: () -> Unit) {
                 }
             }
 
+            // Formulario de registro de consulta clínica
             Text("Registro clínico", style = MaterialTheme.typography.titleMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
                 VetTextField(

@@ -33,7 +33,9 @@ import com.tecsup.huellitasvet.ui.components.MascotaAvatar
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import java.time.LocalDate
 
-/** Edad en años a partir del año de nacimiento. */
+/**
+ * Función auxiliar para formatear la edad relativa en texto comprensible a partir del año de nacimiento.
+ */
 fun edadTexto(anioNacimiento: Int): String {
     val edad = LocalDate.now().year - anioNacimiento
     return when {
@@ -43,6 +45,11 @@ fun edadTexto(anioNacimiento: Int): String {
     }
 }
 
+/**
+ * Pantalla que lista la totalidad de mascotas registradas por el dueño (`MascotasScreen`).
+ * Utiliza un `LazyColumn` para optimizar el rendimiento al desplazarse verticalmente
+ * e incluye un `FloatingActionButton` para navegar al formulario de nueva mascota.
+ */
 @Composable
 fun MascotasScreen(
     vm: InicioViewModel,
@@ -66,6 +73,7 @@ fun MascotasScreen(
                 }
             }
         }
+        /** Botón flotante para registrar una nueva mascota. */
         FloatingActionButton(
             onClick = onAgregar,
             containerColor = MaterialTheme.colorScheme.primary,
@@ -76,6 +84,7 @@ fun MascotasScreen(
     }
 }
 
+/** Componente de fila reutilizable que renderiza los datos básicos de una mascota. */
 @Composable
 private fun MascotaFila(m: Mascota, onClick: () -> Unit) {
     val colores = MaterialTheme.colorScheme

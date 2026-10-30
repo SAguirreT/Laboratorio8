@@ -47,6 +47,11 @@ import com.tecsup.huellitasvet.ui.components.VetButton
 import com.tecsup.huellitasvet.ui.components.iconoServicio
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 
+/**
+ * Pantalla principal del perfil Dueño (`InicioScreen`).
+ * Muestra el saludo personalizado, el resumen de la cita más próxima, el carrusel horizontal
+ * de sus mascotas registradas y los accesos rápidos a los servicios clínicos activos.
+ */
 @Composable
 fun InicioScreen(
     vm: InicioViewModel,
@@ -69,7 +74,7 @@ fun InicioScreen(
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        // Saludo
+        // Cabecera con saludo personalizado
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("Hola, ${nombre.substringBefore(' ')}", style = MaterialTheme.typography.headlineSmall)
@@ -78,20 +83,22 @@ fun InicioScreen(
             Icon(Icons.Filled.Notifications, contentDescription = null, tint = colores.onSurface)
         }
 
+        /** Tarjeta principal destacada con la cita agendada más cercana. */
         TarjetaProximaCita(proxima)
 
-        // Mis mascotas
+        // Sección 'Mis mascotas'
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Mis mascotas", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
             Text("Ver todas", color = colores.primary, style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.clickable(onClick = onVerMascotas).padding(4.dp))
         }
+        /** Carrusel horizontal `LazyRow` con la lista de mascotas y el botón para registrar nueva. */
         LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             items(mascotas, key = { it.id }) { m -> TarjetaMascotaMini(m, onClick = { onFicha(m.id) }) }
             item { TarjetaAgregar(onAgregar) }
         }
 
-        // Servicios
+        // Sección de accesos directos a Servicios
         Text("Servicios", style = MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             servicios.take(3).forEach { s ->
@@ -120,6 +127,7 @@ fun InicioScreen(
     }
 }
 
+/** Componente de tarjeta destacado para presentar la fecha, hora y servicio de la próxima cita. */
 @Composable
 private fun TarjetaProximaCita(cita: CitaConDetalle?) {
     val colores = MaterialTheme.colorScheme
@@ -162,6 +170,7 @@ private fun TarjetaProximaCita(cita: CitaConDetalle?) {
     }
 }
 
+/** Chip o tarjeta compacta para representar visualmente cada mascota dentro del carrusel. */
 @Composable
 private fun TarjetaMascotaMini(m: Mascota, onClick: () -> Unit) {
     val colores = MaterialTheme.colorScheme
@@ -181,6 +190,7 @@ private fun TarjetaMascotaMini(m: Mascota, onClick: () -> Unit) {
     }
 }
 
+/** Tarjeta especial con ícono '+' para solicitar el registro de una nueva mascota. */
 @Composable
 private fun TarjetaAgregar(onClick: () -> Unit) {
     val colores = MaterialTheme.colorScheme

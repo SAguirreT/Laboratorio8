@@ -5,10 +5,24 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/**
- * N citas -> 1 mascota y N citas -> 1 servicio.
- * fecha 'aaaa-MM-dd' y hora 'HH:mm' son texto: se ordenan bien y se comparan con = en SQL.
- * precio es una 'foto' del precio del servicio al momento de pedir la cita.
+/*
+ * COMMIT 2 - feat(data): agrega entidades Usuario, Mascota y Cita
+ * Rama: main
+ * Hash: 9a390f3
+ *
+ * ¿QUÉ SE REALIZÓ?
+ * Se creó la entidad Cita que enlaza una Mascota con un Servicio mediante claves foráneas.
+ *
+ * ¿POR QUÉ?
+ * Para gestionar las reservas médicas, estados (PENDIENTE, CONFIRMADA, ATENDIDA, CANCELADA) y registros clínicos.
+ *
+ * ARCHIVOS RELACIONADOS DEL MISMO COMMIT:
+ * - Usuario.kt
+ * - Mascota.kt
+ * - Cita.kt
+ *
+ * RELACIÓN:
+ * Cita une Mascota y Servicio, registrando la fecha, hora, diagnóstico y precio en el momento del agendamiento.
  */
 @Entity(
     tableName = "citas",
@@ -19,7 +33,7 @@ import androidx.room.PrimaryKey
     indices = [
         Index("mascotaId"),
         Index("servicioId"),
-        Index(value = ["fecha", "hora"]) // acelera la consulta de horarios ocupados
+        Index(value = ["fecha", "hora"])
     ]
 )
 data class Cita(
@@ -29,7 +43,7 @@ data class Cita(
     val fecha: String,
     val hora: String,
     val nota: String = "",
-    val estado: String, // PENDIENTE | CONFIRMADA | ATENDIDA | CANCELADA
+    val estado: String,
     val precio: Double,
     val diagnostico: String? = null,
     val tratamiento: String? = null,

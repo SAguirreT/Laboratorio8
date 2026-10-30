@@ -42,7 +42,11 @@ import com.tecsup.huellitasvet.ui.components.VarianteBoton
 import com.tecsup.huellitasvet.ui.components.VetButton
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 
-/** Ficha de la mascota: cabecera, acciones y pestañas Datos / Historial clínico. */
+/**
+ * Pantalla que exhibe la ficha detallada de una mascota (`FichaMascotaScreen`).
+ * Incluye un selector segmentado para conmutar entre los Datos biológicos y el Historial clínico.
+ * Habilita botones de acción (pedir cita y editar) si la navegación proviene de un Dueño.
+ */
 @Composable
 fun FichaMascotaScreen(
     vm: MascotaViewModel,
@@ -67,6 +71,7 @@ fun FichaMascotaScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             CabeceraMascota(m)
+            /** Botones de acción rápido únicamente accesibles para el cliente. */
             if (!esVeterinario) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     VetButton("Pedir cita", onClick = onPedirCita, icono = Icons.Filled.CalendarMonth, modifier = Modifier.weight(1f))
@@ -79,6 +84,7 @@ fun FichaMascotaScreen(
     }
 }
 
+/** Renderiza el avatar en tamaño grande y el resumen de la mascota. */
 @Composable
 private fun CabeceraMascota(m: Mascota) {
     val colores = MaterialTheme.colorScheme
@@ -105,6 +111,7 @@ private fun CabeceraMascota(m: Mascota) {
     }
 }
 
+/** Pestaña 0: Muestra la tabla de atributos biológicos de la mascota. */
 @Composable
 private fun DatosMascota(m: Mascota, atenciones: Int) {
     val colores = MaterialTheme.colorScheme
@@ -134,6 +141,7 @@ private fun DatosMascota(m: Mascota, atenciones: Int) {
     }
 }
 
+/** Pestaña 1: Renderiza la línea de tiempo del historial médico (diagnósticos y tratamientos acumulados). */
 @Composable
 private fun HistorialClinico(historial: List<CitaConDetalle>) {
     if (historial.isEmpty()) {

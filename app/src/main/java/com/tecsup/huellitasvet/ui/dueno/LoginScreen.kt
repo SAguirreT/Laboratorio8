@@ -36,7 +36,11 @@ import com.tecsup.huellitasvet.ui.components.VetTextField
 import com.tecsup.huellitasvet.ui.theme.VetTheme
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 
-/** Un solo Composable para ambos roles: el selector cambia el color del tema. */
+/**
+ * Pantalla unificada de inicio de sesión (`LoginScreen`).
+ * Permite seleccionar el rol ("Dueño" o "Veterinario") mediante un selector segmentado.
+ * Cambia dinámicamente el esquema de colores del tema (`VetTheme`) según el rol seleccionado.
+ */
 @Composable
 fun LoginScreen(vm: SesionViewModel, oscuro: Boolean) {
     var rol by rememberSaveable { mutableStateOf(Rol.CLIENTE) }
@@ -59,6 +63,7 @@ fun LoginScreen(vm: SesionViewModel, oscuro: Boolean) {
                 Text("Bienvenido", style = MaterialTheme.typography.headlineMedium)
                 Text("Ingresa para continuar", color = colores.onSurfaceVariant)
             }
+            /** Selector segmentado que conmuta entre rol CLIENTE y ADMIN. */
             SelectorSegmentado(
                 opciones = listOf(Rol.CLIENTE.etiqueta, Rol.ADMIN.etiqueta),
                 seleccion = rol.ordinal,
@@ -81,6 +86,7 @@ fun LoginScreen(vm: SesionViewModel, oscuro: Boolean) {
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.align(Alignment.End)
             )
+            /** Presenta en texto rojo los errores retornados por el ViewModel. */
             if (error != null) {
                 Text(error ?: "", color = colores.error, style = MaterialTheme.typography.bodySmall)
             }

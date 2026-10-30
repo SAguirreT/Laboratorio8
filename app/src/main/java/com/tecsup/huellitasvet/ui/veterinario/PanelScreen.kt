@@ -41,6 +41,11 @@ import com.tecsup.huellitasvet.ui.theme.Superficie2
 import com.tecsup.huellitasvet.viewmodel.PanelViewModel
 import java.time.LocalDate
 
+/**
+ * Pantalla de Panel / Dashboard administrativo del Veterinario (`PanelScreen`).
+ * Muestra contadores de rendimiento operativo (citas hoy, pendientes, atendidas),
+ * el acumulado de ingresos mensuales y gráficos estadísticos (Gráfico de Dona para estados y Barras para servicios).
+ */
 @Composable
 fun PanelScreen(vm: PanelViewModel, onVerAgenda: () -> Unit) {
     val citasHoy by vm.citasHoy.collectAsState()
@@ -66,14 +71,14 @@ fun PanelScreen(vm: PanelViewModel, onVerAgenda: () -> Unit) {
             Icon(Icons.Filled.Notifications, contentDescription = null)
         }
 
-        // 3 contadores de color
+        // Fila de indicadores clave de desempeño (KPIs)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Contador(citasHoy, "Citas hoy", colores.primary, colores.primaryContainer, Modifier.weight(1f))
             Contador(pendientes, "Pendientes", EstadoPendiente, AmbarSuave, Modifier.weight(1f))
             Contador(atendidas, "Atendidas", EstadoAtendida, Superficie2, Modifier.weight(1f))
         }
 
-        // Ingresos del mes
+        // Tarjeta acumulativa de ingresos financieros mensuales
         Surface(shape = RoundedCornerShape(18.dp), color = colores.primary, contentColor = colores.onPrimary, modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(18.dp)) {
                 Text("Ingresos del mes", style = MaterialTheme.typography.labelMedium, color = colores.onPrimary.copy(alpha = 0.8f))
@@ -84,6 +89,7 @@ fun PanelScreen(vm: PanelViewModel, onVerAgenda: () -> Unit) {
             }
         }
 
+        /** Gráfico de Dona para visualizar la distribución porcentual de citas por su estado. */
         Tarjeta("Citas por estado") {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 GraficoDona(porEstado)
@@ -91,6 +97,7 @@ fun PanelScreen(vm: PanelViewModel, onVerAgenda: () -> Unit) {
             }
         }
 
+        /** Gráfico de Barras para analizar los servicios más solicitados. */
         Tarjeta("Citas por servicio") {
             if (porServicio.isEmpty()) {
                 Text("Sin datos", color = colores.onSurfaceVariant)
@@ -115,6 +122,7 @@ fun PanelScreen(vm: PanelViewModel, onVerAgenda: () -> Unit) {
     }
 }
 
+/** Tarjeta individual de indicador numérico. */
 @Composable
 private fun Contador(valor: Int, etiqueta: String, color: Color, fondo: Color, modifier: Modifier) {
     Surface(shape = RoundedCornerShape(16.dp), color = fondo, modifier = modifier) {
@@ -125,6 +133,7 @@ private fun Contador(valor: Int, etiqueta: String, color: Color, fondo: Color, m
     }
 }
 
+/** Contenedor genérico de tarjeta con título para envolver los gráficos. */
 @Composable
 private fun Tarjeta(titulo: String, contenido: @Composable () -> Unit) {
     val colores = MaterialTheme.colorScheme

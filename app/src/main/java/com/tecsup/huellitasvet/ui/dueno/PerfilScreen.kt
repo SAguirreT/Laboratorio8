@@ -33,7 +33,11 @@ import com.tecsup.huellitasvet.ui.theme.EstadoPendiente
 import com.tecsup.huellitasvet.ui.theme.Superficie2
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 
-/** Perfil del dueño: datos, contadores, preferencias, cambio de perfil y cierre de sesión. */
+/**
+ * Pantalla de perfil del dueño de mascota (`PerfilScreen`).
+ * Muestra el nombre y correo del usuario, resúmenes estadísticos (Mascotas, Citas próximas, Atenciones),
+ * accesos a ajustes de la app (modo oscuro, notificaciones), cambio de rol y cierre de sesión.
+ */
 @Composable
 fun PerfilScreen(
     usuario: Usuario,
@@ -52,13 +56,19 @@ fun PerfilScreen(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            /** Tarjeta con los datos principales del usuario logueado. */
             TarjetaUsuario(usuario)
+
+            /** Bloque de contadores rápidos de actividad. */
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Contador(mascotas, "Mascotas", colores.primary, colores.primaryContainer, Modifier.weight(1f))
                 Contador(proximas, "Próximas", EstadoPendiente, AmbarSuave, Modifier.weight(1f))
                 Contador(atenciones, "Atenciones", EstadoAtendida, Superficie2, Modifier.weight(1f))
             }
+
+            /** Botón para cambiar dinámicamente al perfil de Veterinario (modo práctica). */
             BotonCambiarPerfil("Veterinario", onClick = sesionVm::cambiarPerfil)
+
             Text("Preferencias", style = MaterialTheme.typography.titleMedium)
             GrupoPreferencias(
                 listOf(
@@ -72,6 +82,7 @@ fun PerfilScreen(
     }
 }
 
+/** Componente de contador numérico con fondo estilizado. */
 @Composable
 private fun Contador(valor: Int, etiqueta: String, color: Color, fondo: Color, modifier: Modifier) {
     Surface(shape = RoundedCornerShape(16.dp), color = fondo, modifier = modifier) {

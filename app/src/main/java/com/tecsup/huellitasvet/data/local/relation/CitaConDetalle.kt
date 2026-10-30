@@ -9,9 +9,27 @@ import com.tecsup.huellitasvet.model.EstadoCita
 import com.tecsup.huellitasvet.model.Fechas
 import java.time.LocalDateTime
 
-/**
- * Relación anidada de dos niveles: cita -> mascota -> dueño, y además cita -> servicio.
- * entity = Mascota::class le dice a Room qué tabla consultar para armar MascotaConDueno.
+/*
+ * COMMIT 3 - feat(data): agrega DAOs y relaciones CitaConDetalle y MascotaConDueno
+ * Rama: main
+ * Hash: 4d9158f
+ *
+ * ¿QUÉ SE REALIZÓ?
+ * Se creó la relación anidada CitaConDetalle relacionando Cita -> MascotaConDueno (Mascota + Usuario) y Cita -> Servicio.
+ *
+ * ¿POR QUÉ?
+ * Para obtener en una sola consulta relacional de Room todos los datos necesarios para renderizar tarjetas de citas y la agenda.
+ *
+ * ARCHIVOS RELACIONADOS DEL MISMO COMMIT:
+ * - UsuarioDao.kt
+ * - MascotaDao.kt
+ * - CitaDao.kt
+ * - MascotaConDueno.kt
+ * - CitaConDetalle.kt
+ * - UltimaVisita.kt
+ *
+ * RELACIÓN:
+ * Es el modelo de relación de 2 niveles utilizado ampliamente por CitaDao y consumido por los ViewModels.
  */
 data class CitaConDetalle(
     @Embedded val cita: Cita,
@@ -21,6 +39,5 @@ data class CitaConDetalle(
     val servicio: Servicio
 )
 
-// Ayudas fuera de la clase para que Room no las confunda con columnas.
 val CitaConDetalle.estado: EstadoCita get() = EstadoCita.desde(cita.estado)
 val CitaConDetalle.fechaHora: LocalDateTime get() = Fechas.fechaHora(cita.fecha, cita.hora)

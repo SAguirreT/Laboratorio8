@@ -12,19 +12,21 @@ import com.tecsup.huellitasvet.model.UltimaVisita
 import kotlinx.coroutines.flow.Flow
 
 /**
- * El contrato de datos de la app. Los ViewModels solo conocen esta interface;
- * hoy la implementa Room (VetRepositoryRoom) y en la Semana 9 la implementará un servicio web.
+ * Interfaz que define el contrato de datos abstraído para la aplicación.
+ * Sigue el patrón Repository de la arquitectura MVVM: desacopla la fuente de datos real
+ * ( Room local o API REST remota) de la capa de presentación (ViewModels).
  *
- * Regla de oro: lectura que debe actualizar la pantalla -> Flow (sin suspend).
- * Escritura o acción única -> suspend.
+ * Convención de diseño:
+ * - Operaciones de consulta continua de la interfaz -> devuelven `Flow` (observación reactiva).
+ * - Operaciones de un solo paso o modificación -> declaradas como `suspend`.
  */
 interface VetRepository {
     // Usuarios
     suspend fun login(correo: String, clave: String): Usuario?
-    suspend fun obtenerUsuario(id: Int): Usuario?          // agregada: recuperar la sesión guardada
-    suspend fun primerUsuarioConRol(rol: Rol): Usuario?    // agregada: 'Cambiar de perfil'
+    suspend fun obtenerUsuario(id: Int): Usuario?
+    suspend fun primerUsuarioConRol(rol: Rol): Usuario?
 
-    // Servicios (ejemplo resuelto)
+    // Servicios
     fun observarServicios(): Flow<List<Servicio>>
     fun observarServiciosActivos(): Flow<List<Servicio>>
     suspend fun guardarServicio(s: Servicio)
@@ -39,7 +41,7 @@ interface VetRepository {
     suspend fun guardarMascota(m: Mascota)
     suspend fun eliminarMascota(m: Mascota)
     suspend fun mascotaTieneCitas(id: Int): Boolean
-    fun observarUltimasVisitas(): Flow<List<UltimaVisita>> // agregada: lista de Pacientes
+    fun observarUltimasVisitas(): Flow<List<UltimaVisita>>
 
     // Citas
     fun observarHorasOcupadas(fecha: String): Flow<List<String>>
@@ -51,7 +53,7 @@ interface VetRepository {
     suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita)
     suspend fun registrarAtencion(citaId: Int, diagnostico: String, tratamiento: String, peso: Double)
 
-    // Panel
+    // Panel administrativo
     fun observarCitasDeFecha(fecha: String): Flow<Int>
     fun observarCantidadPorEstado(estado: EstadoCita): Flow<Int>
     fun observarCitasPorServicio(): Flow<List<ConteoServicio>>

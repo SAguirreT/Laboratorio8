@@ -41,6 +41,11 @@ import com.tecsup.huellitasvet.ui.components.SelectorSegmentado
 import com.tecsup.huellitasvet.ui.components.iconoServicio
 import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
 
+/**
+ * Pantalla que presenta el historial y las reservas de citas del cliente (`MisCitasScreen`).
+ * Emplea un selector segmentado para organizar la vista entre citas "Próximas" e "Historial",
+ * e integra un cuadro de diálogo de confirmación (`AlertDialog`) antes de procesar una cancelación.
+ */
 @Composable
 fun MisCitasScreen(
     vm: MisCitasViewModel,
@@ -53,6 +58,7 @@ fun MisCitasScreen(
     var porCancelar by remember { mutableStateOf<CitaConDetalle?>(null) }
     val contexto = LocalContext.current
 
+    /** Muestra avisos informativos sobre el resultado de la cancelación. */
     LaunchedEffect(mensaje) {
         mensaje?.let {
             Toast.makeText(contexto, it, Toast.LENGTH_SHORT).show()
@@ -89,7 +95,6 @@ fun MisCitasScreen(
                         estado = c.estado
                     ) {
                         if (pestana == 0 && c.estado.esActiva) {
-                            // Si faltan 2 horas o menos, el ViewModel responde 'Ya no puedes cancelar esta cita'
                             TextButton(onClick = { if (vm.puedeCancelar(c)) porCancelar = c else vm.cancelar(c) }) {
                                 Text("Cancelar", color = MaterialTheme.colorScheme.error)
                             }
@@ -101,6 +106,7 @@ fun MisCitasScreen(
                 }
             }
         }
+        /** Botón flotante para solicitar una nueva cita médica. */
         FloatingActionButton(
             onClick = onPedirCita,
             containerColor = MaterialTheme.colorScheme.primary,
@@ -110,7 +116,7 @@ fun MisCitasScreen(
         }
     }
 
-    // Confirmación antes de cancelar
+    /** Diálogo modal de confirmación antes de cancelar definitivamente una reserva. */
     porCancelar?.let { c ->
         AlertDialog(
             onDismissRequest = { porCancelar = null },

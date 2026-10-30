@@ -41,6 +41,11 @@ import com.tecsup.huellitasvet.ui.components.VetButton
 import com.tecsup.huellitasvet.ui.components.iconoServicio
 import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
 
+/**
+ * Pantalla de reserva de citas clínicas (`PedirCitaScreen`).
+ * Permite seleccionar secuencialmente la mascota atendida, el servicio requerido,
+ * la fecha del calendario y la hora dentro de la grilla de turnos de 18 horarios.
+ */
 @Composable
 fun PedirCitaScreen(
     vm: PedirCitaViewModel,
@@ -61,6 +66,7 @@ fun PedirCitaScreen(
     val contexto = LocalContext.current
     val colores = MaterialTheme.colorScheme
 
+    /** Escucha el flag de confirmación y despliega una notificación emergente Toast. */
     LaunchedEffect(creada) {
         if (creada) {
             Toast.makeText(contexto, "Cita registrada como PENDIENTE", Toast.LENGTH_SHORT).show()
@@ -87,6 +93,7 @@ fun PedirCitaScreen(
                 Aviso(Icons.Filled.Warning, "La clínica no está recibiendo citas", "Vuelve a intentarlo más tarde.")
             }
 
+            // Selector horizontal de mascotas
             Text("¿Quién viene?", style = MaterialTheme.typography.titleSmall)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(mascotas, key = { it.id }) { m ->
@@ -106,21 +113,23 @@ fun PedirCitaScreen(
                 }
             }
 
+            // Lista de selección de servicios activos
             Text("Servicio", style = MaterialTheme.typography.titleSmall)
             servicios.forEach { s ->
                 FilaServicio(s, elegido = s.id == servicioId, onClick = { vm.elegirServicio(s.id) })
             }
 
+            // Selector horizontal de fecha (0 a 7 días)
             Text("Fecha", style = MaterialTheme.typography.titleSmall)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(vm.fechas) { f -> FechaChip(f, f == fecha, onClick = { vm.elegirFecha(f) }) }
             }
 
+            // Grilla de horarios de atención (18 turnos divididos en filas de 4 columnas)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Hora", style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
                 Text("Ocupado = gris", style = MaterialTheme.typography.labelSmall, color = colores.onSurfaceVariant)
             }
-            // 18 horarios en filas de 4
             horarios.chunked(4).forEach { fila ->
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     fila.forEach { h ->
@@ -136,7 +145,7 @@ fun PedirCitaScreen(
                 }
             }
 
-            // Resumen
+            // Resumen de la reserva
             val mascota = mascotas.firstOrNull { it.id == mascotaId }
             val servicio = servicios.firstOrNull { it.id == servicioId }
             if (mascota != null && servicio != null) {
@@ -158,6 +167,7 @@ fun PedirCitaScreen(
     }
 }
 
+/** Componente de fila para renderizar la tarjeta seleccionable de cada servicio clínico. */
 @Composable
 private fun FilaServicio(s: Servicio, elegido: Boolean, onClick: () -> Unit) {
     val colores = MaterialTheme.colorScheme

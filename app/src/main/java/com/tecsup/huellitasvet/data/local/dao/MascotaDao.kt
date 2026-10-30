@@ -10,6 +10,28 @@ import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.relation.MascotaConDueno
 import kotlinx.coroutines.flow.Flow
 
+/*
+ * COMMIT 3 - feat(data): agrega DAOs y relaciones CitaConDetalle y MascotaConDueno
+ * Rama: main
+ * Hash: 4d9158f
+ *
+ * ¿QUÉ SE REALIZÓ?
+ * Se implementó MascotaDao con operaciones CRUD y consultas reactivas con Flow para las mascotas.
+ *
+ * ¿POR QUÉ?
+ * Para permitir la inserción, actualización, eliminación y filtrado de mascotas por dueño.
+ *
+ * ARCHIVOS RELACIONADOS DEL MISMO COMMIT:
+ * - UsuarioDao.kt
+ * - MascotaDao.kt
+ * - CitaDao.kt
+ * - MascotaConDueno.kt
+ * - CitaConDetalle.kt
+ * - UltimaVisita.kt
+ *
+ * RELACIÓN:
+ * MascotaDao gestiona la tabla mascotas y utiliza MascotaConDueno en consultas relacionales `@Transaction`.
+ */
 @Dao
 interface MascotaDao {
     @Insert

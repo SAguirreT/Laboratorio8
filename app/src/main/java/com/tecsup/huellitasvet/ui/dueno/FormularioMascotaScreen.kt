@@ -34,7 +34,11 @@ import com.tecsup.huellitasvet.ui.components.VetButton
 import com.tecsup.huellitasvet.ui.components.VetTextField
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 
-/** Sirve para crear (esEdicion = false) y para editar una mascota. */
+/**
+ * Formulario para el alta y edición de datos de una mascota (`FormularioMascotaScreen`).
+ * Precarga automáticamente los datos de la mascota si `esEdicion = true` y
+ * expone los campos de nombre, especie, raza, año de nacimiento, peso y sexo con validación.
+ */
 @Composable
 fun FormularioMascotaScreen(
     vm: MascotaViewModel,
@@ -57,7 +61,7 @@ fun FormularioMascotaScreen(
     var sexo by rememberSaveable { mutableStateOf<Sexo?>(null) }
     var precargado by rememberSaveable { mutableStateOf(false) }
 
-    // Al editar, llena los campos una sola vez cuando llega la mascota
+    /** Rellena los campos una única vez cuando se edita una mascota existente. */
     LaunchedEffect(mascota) {
         val m = mascota
         if (esEdicion && m != null && !precargado) {
@@ -129,6 +133,7 @@ fun FormularioMascotaScreen(
     }
 }
 
+/** Componente auxiliar para rotular secciones del formulario y mostrar errores en rojo. */
 @Composable
 private fun Etiqueta(texto: String, error: String?) {
     Row(verticalAlignment = Alignment.CenterVertically) {

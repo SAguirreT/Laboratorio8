@@ -14,7 +14,10 @@ import com.tecsup.huellitasvet.model.Rol
 import com.tecsup.huellitasvet.model.UltimaVisita
 import kotlinx.coroutines.flow.Flow
 
-/** Implementación con Room: cada función solo delega en los DAOs. */
+/**
+ * Implementación concreta del repositorio utilizando Room como fuente de datos persistente.
+ * Mapea las llamadas del contrato `VetRepository` hacia las ejecuciones en los DAOs correspondientes.
+ */
 class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
 
     private val usuarioDao = db.usuarioDao()
@@ -29,7 +32,7 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
 
     override suspend fun primerUsuarioConRol(rol: Rol): Usuario? = usuarioDao.primeroConRol(rol.name)
 
-    // ---------- Servicios (ejemplo resuelto) ----------
+    // ---------- Servicios ----------
     override fun observarServicios(): Flow<List<Servicio>> = servicioDao.observarTodos()
 
     override fun observarServiciosActivos(): Flow<List<Servicio>> = servicioDao.observarActivos()
@@ -65,8 +68,10 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     override fun observarHorasOcupadas(fecha: String): Flow<List<String>> = citaDao.observarHorasOcupadas(fecha)
 
     /**
-     * Copia el precio del servicio (foto del momento), crea la cita PENDIENTE y devuelve su id.
-     * Devuelve -1 si el servicio no existe o si el horario ya se ocupó.
+     * Ejecuta la creación de una cita dentro de un bloque de transacción atómica (`db.withTransaction`).
+     * 1. Verifica la existencia del servicio y toma su precio actual.
+     * 2. Confirma que el horario no haya sido ocupado por otro usuario simultáneamente.
+     * 3. Registra la cita en estado PENDIENTE. Si alguna verificación falla, retorna -1L y no guarda nada.
      */
     override suspend fun crearCita(mascotaId: Int, servicioId: Int, fecha: String, hora: String, nota: String): Long =
         db.withTransaction {
@@ -97,8 +102,9 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     override suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita) = citaDao.actualizarEstado(id, estado.name)
 
     /**
-     * UNA transacción para dos tablas: la cita pasa a ATENDIDA con sus datos y la mascota
-     * actualiza su peso. Si algo falla, Room deshace todo (no queda nada a medias).
+     * Registra la atención médica usando `db.withTransaction` para garantizar consistencia atómica entre tablas.
+     * Modifica la cita a 'ATENDIDA' con su diagnóstico y simultáneamente actualiza el peso de la mascota.
+     * Si ocurriese un error durante la actualización del peso, la transacción revierte los cambios en la cita.
      */
     override suspend fun registrarAtencion(citaId: Int, diagnostico: String, tratamiento: String, peso: Double) {
         db.withTransaction {
@@ -108,7 +114,7 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
         }
     }
 
-    // ---------- Panel ----------
+    // ---------- Panel administrativo ----------
     override fun observarCitasDeFecha(fecha: String): Flow<Int> = citaDao.contarPorFecha(fecha)
 
     override fun observarCantidadPorEstado(estado: EstadoCita): Flow<Int> = citaDao.contarPorEstado(estado.name)

@@ -41,7 +41,12 @@ import com.tecsup.huellitasvet.ui.components.OpcionChip
 import com.tecsup.huellitasvet.viewmodel.AgendaViewModel
 import java.time.LocalDate
 
-/** Agenda del día: línea de tiempo por hora con tarjetas y acciones según el estado. */
+/**
+ * Pantalla de la Agenda diaria para el Veterinario (`AgendaScreen`).
+ * Muestra un selector horizontal de días de la semana y una línea de tiempo vertical
+ * con la lista cronológica de citas programadas, incluyendo botones de acción
+ * de acuerdo con el estado de la cita (Confirmar o Atender).
+ */
 @Composable
 fun AgendaScreen(vm: AgendaViewModel, onAtender: (Int) -> Unit) {
     val fecha by vm.fechaSeleccionada.collectAsState()
@@ -50,6 +55,7 @@ fun AgendaScreen(vm: AgendaViewModel, onAtender: (Int) -> Unit) {
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("Agenda")
+        /** Carrusel horizontal de días. */
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -59,6 +65,7 @@ fun AgendaScreen(vm: AgendaViewModel, onAtender: (Int) -> Unit) {
                 OpcionChip(texto, d == fecha, onClick = { vm.elegirFecha(d) })
             }
         }
+        /** Línea de tiempo vertical con las citas registradas en el día seleccionado. */
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp)
@@ -82,15 +89,18 @@ fun AgendaScreen(vm: AgendaViewModel, onAtender: (Int) -> Unit) {
     }
 }
 
+/** Componente de fila individual en la línea de tiempo de la agenda. */
 @Composable
 private fun FilaAgenda(c: CitaConDetalle, onConfirmar: () -> Unit, onAtender: () -> Unit, onCancelar: () -> Unit) {
     val colores = MaterialTheme.colorScheme
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-        // Hora + línea de tiempo
+        // Columna izquierda con la hora de la cita
         Column(Modifier.width(56.dp)) {
             Text(c.cita.hora, color = colores.primary, style = MaterialTheme.typography.labelLarge)
         }
+        // Línea vertical separadora de la agenda
         Box(Modifier.width(2.dp).fillMaxHeight().background(colores.outline))
+        // Tarjeta con detalles del paciente, dueño, servicio y botones de acción
         Surface(
             shape = RoundedCornerShape(16.dp),
             color = colores.surface,
@@ -112,6 +122,7 @@ private fun FilaAgenda(c: CitaConDetalle, onConfirmar: () -> Unit, onAtender: ()
                     if (c.estado.esActiva) {
                         TextButton(onClick = onCancelar) { Text("Cancelar", color = colores.error) }
                     }
+                    /** Botón dinámico según el ciclo de la cita: PENDIENTE -> Confirmar; CONFIRMADA -> Atender. */
                     when (c.estado) {
                         EstadoCita.PENDIENTE -> Button(onClick = onConfirmar) { Text("Confirmar") }
                         EstadoCita.CONFIRMADA -> Button(onClick = onAtender) { Text("Atender") }

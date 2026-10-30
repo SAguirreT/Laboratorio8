@@ -7,16 +7,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.huellitasvet.VetApp
 
-/** Fábrica genérica: recibe una función que construye el ViewModel con sus dependencias. */
+/**
+ * Fábrica genérica para la instanciación personalizada de ViewModels que requieren dependencias en su constructor.
+ * Implementa `ViewModelProvider.Factory` delegando la creación a un lambda builder.
+ */
 class VetViewModelFactory(private val crear: () -> ViewModel) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = crear() as T
 }
 
 /**
- * Atajo para las pantallas:
- * val vm = vetViewModel { app -> ServiciosViewModel(app.repository) }
- * El ViewModel vive mientras viva su destino de navegación.
+ * Función helper composable para instanciar ViewModels de forma concisa inyectando las dependencias globales de `VetApp`.
+ * Obtiene el contexto de la aplicación para extraer el repositorio y las preferencias.
  */
 @Composable
 inline fun <reified VM : ViewModel> vetViewModel(

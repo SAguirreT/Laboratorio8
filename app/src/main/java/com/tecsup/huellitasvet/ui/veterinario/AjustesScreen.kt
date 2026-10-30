@@ -23,7 +23,11 @@ import com.tecsup.huellitasvet.ui.components.VarianteBoton
 import com.tecsup.huellitasvet.ui.components.VetButton
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 
-/** Ajustes del veterinario. 'Aceptar citas' apagado impide que los dueños pidan citas. */
+/**
+ * Pantalla de Ajustes de la clínica para el perfil de Veterinario (`AjustesScreen`).
+ * Permite alternar las preferencias del sistema (modo oscuro, notificaciones) y pausar/abrir
+ * globalmente la recepción de reservas de citas (`aceptarCitas`), además de cerrar sesión.
+ */
 @Composable
 fun AjustesScreen(usuario: Usuario, sesionVm: SesionViewModel) {
     val oscuro by sesionVm.modoOscuro.collectAsState()
@@ -39,6 +43,7 @@ fun AjustesScreen(usuario: Usuario, sesionVm: SesionViewModel) {
             TarjetaUsuario(usuario)
             BotonCambiarPerfil("Dueño", onClick = sesionVm::cambiarPerfil)
             Text("Preferencias", style = MaterialTheme.typography.titleMedium)
+            /** Switches de preferencia persistidos en DataStore. */
             GrupoPreferencias(
                 listOf(
                     OpcionSwitch("Modo oscuro", "Cambia el tema de la app", oscuro, sesionVm::cambiarModoOscuro),

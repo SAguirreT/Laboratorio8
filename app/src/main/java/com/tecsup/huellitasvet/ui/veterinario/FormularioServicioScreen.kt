@@ -40,7 +40,11 @@ import com.tecsup.huellitasvet.ui.components.VetTextField
 import com.tecsup.huellitasvet.ui.components.iconoServicio
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 
-/** Crear (servicioId = -1) o editar un servicio. */
+/**
+ * Formulario para el alta o modificación de un servicio médico (`FormularioServicioScreen`).
+ * Permite definir el nombre, duración en minutos, precio, descripción, ícono representativo
+ * y estado activo del servicio.
+ */
 @Composable
 fun FormularioServicioScreen(vm: ServiciosViewModel, servicioId: Int, onVolver: () -> Unit) {
     val servicios by vm.servicios.collectAsState()
@@ -59,6 +63,7 @@ fun FormularioServicioScreen(vm: ServiciosViewModel, servicioId: Int, onVolver: 
     var activo by rememberSaveable { mutableStateOf(true) }
     var precargado by rememberSaveable { mutableStateOf(false) }
 
+    /** Precarga los campos de entrada si se seleccionó un servicio existente para edición (`servicioId > 0`). */
     LaunchedEffect(original) {
         if (original != null && !precargado) {
             nombre = original.nombre
@@ -100,6 +105,7 @@ fun FormularioServicioScreen(vm: ServiciosViewModel, servicioId: Int, onVolver: 
             VetTextField(precio, { precio = it }, "Precio (S/)", error = errores.precio, teclado = KeyboardType.Decimal)
             VetTextField(descripcion, { descripcion = it }, "Descripción", lineas = 3)
 
+            // Selector de ícono
             Text("Ícono", style = MaterialTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 ICONOS_SERVICIO.forEach { i ->
@@ -118,6 +124,7 @@ fun FormularioServicioScreen(vm: ServiciosViewModel, servicioId: Int, onVolver: 
                 }
             }
 
+            // Switch para disponibilidad
             Surface(shape = RoundedCornerShape(14.dp), color = colores.surface, border = BorderStroke(1.dp, colores.outline), modifier = Modifier.fillMaxWidth()) {
                 Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
