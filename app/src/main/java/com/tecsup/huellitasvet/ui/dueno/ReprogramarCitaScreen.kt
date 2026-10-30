@@ -33,7 +33,30 @@ import com.tecsup.huellitasvet.ui.components.VetButton
 import com.tecsup.huellitasvet.ui.components.iconoServicio
 import com.tecsup.huellitasvet.viewmodel.ReprogramarCitaViewModel
 
-/** Mejora IA: elegir nueva fecha y hora para una cita. */
+/*
+ * COMMIT 17 (EXCLUSIVO MEJORA-IA) - ia: agrega reprogramacion de citas
+ * Rama: mejora-ia
+ * Hash: ba08183
+ *
+ * ¿QUÉ SE REALIZÓ?
+ * Se creó la interfaz composable ReprogramarCitaScreen que muestra la cita actual y los selectores para elegir un nuevo horario.
+ *
+ * ¿POR QUÉ?
+ * Ofrece la experiencia visual al dueño para reprogramar una cita con validación previa de anticipación de 2 horas.
+ *
+ * ARCHIVOS RELACIONADOS DEL MISMO COMMIT:
+ * - ReprogramarCitaViewModel.kt
+ * - ReprogramarCitaScreen.kt
+ * - MisCitasScreen.kt
+ * - NavVet.kt
+ * - Rutas.kt
+ * - CitaDao.kt
+ * - VetRepository.kt
+ * - VetRepositoryRoom.kt
+ *
+ * RELACIÓN:
+ * Consume ReprogramarCitaViewModel y navega de vuelta a MisCitasScreen tras guardar exitosamente.
+ */
 @Composable
 fun ReprogramarCitaScreen(vm: ReprogramarCitaViewModel, onVolver: () -> Unit) {
     val cita by vm.cita.collectAsState()

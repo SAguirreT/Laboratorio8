@@ -18,9 +18,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * Gráfico de líneas dibujado con Canvas: une los puntos en orden y marca cada valor con un círculo.
- * Las etiquetas (fechas) van debajo y los valores encima de la línea.
+/*
+ * COMMIT 16 (EXCLUSIVO MEJORA-IA) - ia: agrega grafico de peso en la ficha de la mascota
+ * Rama: mejora-ia
+ * Hash: b5f589f
+ *
+ * ¿QUÉ SE REALIZÓ?
+ * Se construyó el componente composable GraficoLineas utilizando Canvas de Jetpack Compose para trazar la curva de peso.
+ *
+ * ¿POR QUÉ?
+ * Para permitir al usuario visualizar gráficamente la tendencia de peso de su mascota a lo largo del tiempo.
+ *
+ * ARCHIVOS RELACIONADOS DEL MISMO COMMIT:
+ * - PuntoPeso.kt
+ * - GraficoLineas.kt
+ * - CitaDao.kt
+ * - VetRepository.kt
+ * - VetRepositoryRoom.kt
+ * - MascotaViewModel.kt
+ * - FichaMascotaScreen.kt
+ *
+ * RELACIÓN:
+ * Recibe la lista de datos procesada por MascotaViewModel y dibuja los puntos y líneas de conexión.
  */
 @Composable
 fun GraficoLineas(
@@ -52,12 +71,10 @@ fun GraficoLineas(
         }
         Canvas(Modifier.fillMaxWidth().height(alto).padding(vertical = 10.dp)) {
             val ranura = size.width / datos.size
-            // 3 líneas guía horizontales
             repeat(3) { i ->
                 val y = size.height * i / 2f
                 drawLine(rejilla, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx())
             }
-            // Si todos los pesos son iguales, la línea queda al centro
             val puntos = datos.mapIndexed { i, d ->
                 val x = ranura * i + ranura / 2
                 val y = if (maximo == minimo) size.height / 2 else size.height - (d.valor - minimo) / rango * size.height

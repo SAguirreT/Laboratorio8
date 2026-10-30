@@ -21,9 +21,29 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-/**
- * Mejora IA: el dueño cambia la fecha y hora de una cita PENDIENTE o CONFIRMADA.
- * Respeta la regla de las 2 horas y que el nuevo horario esté libre y en el futuro.
+/*
+ * COMMIT 17 (EXCLUSIVO MEJORA-IA) - ia: agrega reprogramacion de citas
+ * Rama: mejora-ia
+ * Hash: ba08183
+ *
+ * ¿QUÉ SE REALIZÓ?
+ * Se creó ReprogramarCitaViewModel para gestionar la selección de un nuevo día y turno de hora para modificar una cita existente.
+ *
+ * ¿POR QUÉ?
+ * Para permitir que los clientes reprogramen la fecha/hora de su cita sin necesidad de cancelarla y crear una nueva.
+ *
+ * ARCHIVOS RELACIONADOS DEL MISMO COMMIT:
+ * - ReprogramarCitaViewModel.kt
+ * - ReprogramarCitaScreen.kt
+ * - MisCitasScreen.kt
+ * - NavVet.kt
+ * - Rutas.kt
+ * - CitaDao.kt
+ * - VetRepository.kt
+ * - VetRepositoryRoom.kt
+ *
+ * RELACIÓN:
+ * ReprogramarCitaViewModel aplica la validación de 2 horas de anticipación y llama a `repo.reprogramarCita`.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ReprogramarCitaViewModel(
@@ -59,7 +79,6 @@ class ReprogramarCitaViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /** Misma regla que cancelar: solo PENDIENTE/CONFIRMADA y si faltan más de 2 horas. */
     fun sePuedeReprogramar(c: CitaConDetalle): Boolean =
         c.estado.esActiva && Duration.between(LocalDateTime.now(), c.fechaHora).toMinutes() > 120
 
